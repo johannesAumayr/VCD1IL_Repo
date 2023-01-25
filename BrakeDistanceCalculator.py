@@ -10,6 +10,7 @@ NOTE: There might be similarities in the code and the sources with Mr. Hoffmann'
 # libaries
 import numpy as np
 import math
+#import argparse
 from importlib.metadata import metadata
 import matplotlib as mpl    
 import matplotlib.pyplot as plt
@@ -20,10 +21,6 @@ from matplotlib import rc
 rc('mathtext', default='regular')
 #endcopy
 #----
-
-# prompt user and programm discription
-print("Deceleration and brake distance calculator V1.0\n")
-print("Based on the velocity of a vehicle, the road inclination and road surface and road condition, the calculator will determine the brake distance.")
 
 # functions
 def distanceRoT(v): # returns a brake distance with a rough estimation with a rule of thumb
@@ -116,17 +113,21 @@ def plotFunction(t, s, v, tMax, sRoT): #plots the linearly decreasing velocity, 
     plt.savefig(fileName, format = None, metadata=None)                    #source for safe with filneame: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.savefig.html
     plt.show()    
 
+# prompt user and programm discription
+print("Deceleration and brake distance calculator V1.0\n")
+print("Based on the velocity of a vehicle, the road inclination and road surface and road condition, the calculator will determine the brake distance.")
 # gather information + main program
-vKph = int(input ("Enter a velocity (1-300kph): "))
+vKph = int(input ("Enter a velocity (1-300kph):"))
 if vKph >= 0 and vKph <= 300:
-    incAngle = int(input("Enter a positive inclination angle (0-45deg): "))
+    vMetric = vKph / 3.6
+    incAngle = int(input("Enter a positive inclination angle (0-45deg):"))
     if incAngle >= 0 and incAngle <= 45:
-        roadSur = input("Enter a road surface type between (concrete, ice, water, gravel or sand): ")
-        if roadSur == "concrete" or roadSur == "ice" or roadSur == "water" or roadSur == "gravel" or roadSur == "sand":
+        roadSur = input("Enter a road surface type between (concrete, ice, water, gravel or sand):")
+        if roadSur == "concrete" or roadSur == "ice":
             roadCond = input("Enter a road condition between (dry, wet):")
             if roadCond == "dry" or roadCond == "wet":
                 print("Thank you for your selection")
-                vMetric = vKph / 3.6
+                
                 fileName = 'Decelaration_' + str(vKph) + 'kph' + '_' + str(incAngle) + 'degree' + '_' + roadSur + '_' + roadCond   #source for concatinate strings: https://note.nkmk.me/en/python-string-concat/
                 
                 #call function to calculate distances
@@ -144,10 +145,27 @@ if vKph >= 0 and vKph <= 300:
                 plotFunction(t, s, v, tMax, sRoT)
             else:
                 print("You entered a wrong word!")
+        elif roadSur == "water" or roadSur == "gravel" or roadSur == "sand":
+              print("Thank you for your selection")
+              roadCond = "dry"
+              fileName = 'Decelaration_' + str(vKph) + 'kph' + '_' + str(incAngle) + 'degree' + '_' + roadSur + '_' + roadCond   #source for concatinate strings: https://note.nkmk.me/en/python-string-concat/
+                
+              #call function to calculate distances
+              calcMatrix = calcDis(roadSur, roadCond, incAngle, vMetric)
+              t = calcMatrix[0]
+              s = calcMatrix[1]
+              v = calcMatrix[2]
+              tMax = calcMatrix[3]
+
+              # call rule of thumb function
+              sRoT = distanceRoT(vKph)
+              sRoTVector = [sRoT] * len(t)
+
+              # call plot function
+              plotFunction(t, s, v, tMax, sRoT)
         else:
             print("You entered a wrong word!") 
     else:
         print("You entered a wrong number!") 
 else:
     print("You entered a wrong number!")
-
